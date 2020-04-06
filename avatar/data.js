@@ -1,0 +1,188 @@
+module.exports.accessories = [
+  "Blank",
+  "Kurt",
+  "Prescription01",
+  "Prescription02",
+  "Round",
+  "Sunglasses",
+  "Wayfarers"
+];
+module.exports.clothes = [
+  "BlazerShirt",
+  "BlazerSweater",
+  "CollarSweater",
+  "GraphicShirt",
+  "Graphics",
+  "Hoodie",
+  "Overall",
+  "ShirtCrewNeck",
+  "ShirtScoopNeck",
+  "ShirtVNeck"
+];
+module.exports.clothesColor = [
+  "Black",
+  "Blue01",
+  "Blue02",
+  "Blue03",
+  "Gray01",
+  "Gray02",
+  "Heather",
+  "PastelBlue",
+  "PastelGreen",
+  "PastelOrange",
+  "PastelRed",
+  "PastelYellow",
+  "Pink",
+  "Red",
+  "White"
+];
+module.exports.clothesGraphic = [
+  "Skull",
+  "SkullOutline",
+  "Bat",
+  "Cumbia",
+  "Deer",
+  "Diamond",
+  "Hola",
+  "Selena",
+  "Pizza",
+  "Resist",
+  "Bear"
+];
+module.exports.eyebrows = [
+  "Angry",
+  "AngryNatural",
+  "Default",
+  "DefaultNatural",
+  "FlatNatural",
+  "FrownNatural",
+  "RaisedExcited",
+  "RaisedExcitedNatural",
+  "SadConcerned",
+  "SadConcernedNatural",
+  "UnibrowNatural",
+  "UpDown",
+  "UpDownNatural"
+];
+module.exports.eyes = [
+  "Close",
+  "Cry",
+  "Default",
+  "Dizzy",
+  "EyeRoll",
+  "Happy",
+  "Hearts",
+  "Side",
+  "Squint",
+  "Surprised",
+  "Wink",
+  "WinkWacky"
+];
+module.exports.facialHair = [
+  "BeardLight",
+  "BeardMagestic",
+  "BeardMedium",
+  "Blank",
+  "MoustacheFancy",
+  "MoustacheMagnum"
+];
+module.exports.facialHairColors = [
+  "Auburn",
+  "Black",
+  "Blonde",
+  "BlondeGolden",
+  "Brown",
+  "BrownDark",
+  "Platinum",
+  "Red"
+];
+module.exports.hairColors = [
+  "Auburn",
+  "Black",
+  "Blonde",
+  "BlondeGolden",
+  "Brown",
+  "BrownDark",
+  "PastelPink",
+  "Platinum",
+  "Red",
+  "SilverGray"
+];
+module.exports.hatColors = [
+  "Black",
+  "Blue01",
+  "Blue02",
+  "Blue03",
+  "Gray01",
+  "Gray02",
+  "Heather",
+  "PastelBlue",
+  "PastelGreen",
+  "PastelOrange",
+  "PastelRed",
+  "PastelYellow",
+  "Pink",
+  "Red",
+  "White"
+];
+module.exports.mouth = [
+  "Concerned",
+  "Default",
+  "Disbelief",
+  "Eating",
+  "Grimace",
+  "Sad",
+  "ScreamOpen",
+  "Serious",
+  "Smile",
+  "Tongue",
+  "Twinkle",
+  "Vomit"
+];
+module.exports.skin = [
+  "Tanned",
+  "Yellow",
+  "Pale",
+  "Light",
+  "Brown",
+  "DarkBrown",
+  "Black"
+];
+module.exports.top = [
+  "Eyepatch",
+  "Hat",
+  "Hijab",
+  "LongHairBigHair",
+  "LongHairBob",
+  "LongHairBun",
+  "LongHairCurly",
+  "LongHairCurvy",
+  "LongHairDreads",
+  "LongHairFrida",
+  "LongHairFro",
+  "LongHairFroBand",
+  "LongHairMiaWallace",
+  "LongHairNotTooLong",
+  "LongHairShavedSides",
+  "LongHairStraight",
+  "LongHairStraight2",
+  "LongHairStraightStrand",
+  "NoHair",
+  "ShortHairDreads01",
+  "ShortHairDreads02",
+  "ShortHairFrizzle",
+  "ShortHairShaggy",
+  "ShortHairShaggyMullet",
+  "ShortHairShortCurly",
+  "ShortHairShortFlat",
+  "ShortHairShortRound",
+  "ShortHairShortWaved",
+  "ShortHairSides",
+  "ShortHairTheCaesar",
+  "ShortHairTheCaesarSidePart",
+  "Turban",
+  "WinterHat1",
+  "WinterHat2",
+  "WinterHat3",
+  "WinterHat4"
+];
