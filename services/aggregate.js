@@ -1,8 +1,3 @@
-const { UserGroup } = require("../models/userGroup");
-const { UserBlog } = require("../models/userBlog");
-const { GroupBlog } = require("../models/groupBlog");
-const { Blog } = require("../models/blogs");
-
 module.exports.searchQuery = async (
   db,
   dataId,
