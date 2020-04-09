@@ -4,6 +4,7 @@ const c = require("../common/constants");
 const { Reaction } = require("../models/reaction");
 const auth = require("../middlewares/auth");
 const mongoose = require("mongoose");
+const { isValid } = require("../services/aggregate");
 const ITEMS_PER_PAGE = 10;
 //SET NEW REACTION
 router.post("/setReaction", [auth], async (req, res) => {
