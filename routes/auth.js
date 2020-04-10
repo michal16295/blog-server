@@ -4,13 +4,17 @@ const router = express.Router();
 const c = require("../common/constants");
 const valid = require("../validators/user");
 const { User } = require("../models/user");
+const { UserBlog } = require("../models/userBlog");
+const { UserGroup } = require("../models/userGroup");
+const { Reaction } = require("../models/reaction");
+const { Comment } = require("../models/comments");
+const { Group } = require("../models/groups");
+const { Blog } = require("../models/blogs");
 const bcrypt = require("bcrypt");
 const jwtDecode = require("jwt-decode");
 const auth = require("../middlewares/auth");
 const { getAll, isValid } = require("../services/aggregate");
 const { generateRandomAvatar } = require("../avatar/generateAvatar");
-const { Group } = require("../models/groups");
-const { Blog } = require("../models/blogs");
 const { updateAvatar } = require("../services/common");
 
 const ITEMS_PER_PAGE = 3;
@@ -69,7 +73,22 @@ router.post("/register", async (req, res) => {
     .header("access-control-expose-headers", "x-auth-token")
     .send(user);
 });
-
+//DELETE USER
+router.delete("/deleteAccount", [auth], async (req, res) => {
+  const { _id, userName } = req.user;
+  try {
+    await UserGroup.deleteMany({ userName });
+    await UserBlog.deleteMany({ userName });
+    await Reaction.deleteMany({ userName });
+    await Comment.deleteMany({ userName });
+    await Blog.deleteMany({ owner: userName });
+    await Group.deleteMany({ owner: userName });
+    await User.deleteOne({ _id });
+    return res.status(c.SERVER_OK_HTTP_CODE).send("User deleted");
+  } catch (err) {
+    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
+  }
+});
 //Login
 router.post("/login", async (req, res) => {
   let { error } = valid.validateExistingUser(req.body);

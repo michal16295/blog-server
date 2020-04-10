@@ -19,7 +19,8 @@ router.post("/setReaction", [auth], async (req, res) => {
     reaction = new Reaction({
       blogId,
       userName,
-      type: name
+      type: name,
+      ownerAvatar: req.user.avatar
     });
     await reaction.save();
   }
