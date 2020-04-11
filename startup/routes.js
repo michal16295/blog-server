@@ -3,6 +3,7 @@ const groups = require("../routes/groups");
 const blogs = require("../routes/blogs");
 const reactions = require("../routes/reactions");
 const comments = require("../routes/comments");
+const notifications = require("../routes/notifications");
 const express = require("express");
 
 module.exports = app => {
@@ -12,4 +13,5 @@ module.exports = app => {
   app.use("/blogs", blogs);
   app.use("/reactions", reactions);
   app.use("/comments", comments);
+  app.use("/notifications", notifications);
 };

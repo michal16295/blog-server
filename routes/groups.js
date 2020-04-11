@@ -9,7 +9,7 @@ const { User } = require("../models/user");
 const auth = require("../middlewares/auth");
 const mongoose = require("mongoose");
 const { searchQuery, getAll, isValid } = require("../services/aggregate");
-const { relCreation } = require("../services/common");
+const { UserGroupCreate } = require("../services/groups");
 const ITEMS_PER_PAGE = 3;
 
 //CREATE A GROUP
@@ -27,13 +27,7 @@ router.post("/create", [auth], async (req, res) => {
       ownerAvatar
     });
     await group.save();
-    const ug = await relCreation(
-      owner,
-      members,
-      "userName",
-      "groupId",
-      group._id
-    );
+    const ug = await UserGroupCreate(owner, members, group._id, ownerAvatar);
     await UserGroup.insertMany(ug);
     return res.status(c.SERVER_OK_HTTP_CODE).send(group);
   } catch (ex) {

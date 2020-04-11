@@ -9,7 +9,6 @@ const { GroupBlog } = require("../models/groupBlog");
 const { UserGroup } = require("../models/userGroup");
 const { User } = require("../models/user");
 const auth = require("../middlewares/auth");
-const { relCreation, blogGroupRel } = require("../services/common");
 const mongoose = require("mongoose");
 const { getToken } = require("../middlewares/getToken");
 const {
@@ -18,7 +17,9 @@ const {
   getOwnersBlogs,
   getUsersBlogs,
   getPublicBlogs,
-  isAuthotrized
+  isAuthotrized,
+  UserBlogCreation,
+  blogGroupRel
 } = require("../services/blogs");
 const ITEMS_PER_PAGE = 3;
 
@@ -67,16 +68,16 @@ router.post("/create", [auth], async (req, res) => {
     description: req.body.description,
     owner: req.body.owner,
     permission: req.body.permission,
-    tags: req.body.tags
+    tags: req.body.tags,
+    ownerAvatar: req.user.avatar
   });
   await blog.save();
   if (req.body.permission === "private") {
-    const userBlog = await relCreation(
+    const userBlog = await UserBlogCreation(
       req.body.owner,
       req.body.members,
-      "userName",
-      "blogId",
-      blog._id
+      blog._id,
+      req.user.avatar
     );
     await UserBlog.insertMany(userBlog);
     const groupBlog = await blogGroupRel(req.body.groups, blog._id);

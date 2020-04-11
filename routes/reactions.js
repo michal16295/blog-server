@@ -2,10 +2,13 @@ const express = require("express");
 const router = express.Router();
 const c = require("../common/constants");
 const { Reaction } = require("../models/reaction");
+const { Notification } = require("../models/notification");
+const { Blog } = require("../models/blogs");
 const auth = require("../middlewares/auth");
 const mongoose = require("mongoose");
 const { isValid } = require("../services/aggregate");
 const ITEMS_PER_PAGE = 10;
+
 //SET NEW REACTION
 router.post("/setReaction", [auth], async (req, res) => {
   const { blogId, name, userName } = req.body;
@@ -23,6 +26,19 @@ router.post("/setReaction", [auth], async (req, res) => {
       ownerAvatar: req.user.avatar
     });
     await reaction.save();
+    const blog = await Blog.findById(blogId);
+    if (userName !== blog.owner) {
+      const notify = new Notification({
+        from: userName,
+        to: blog.owner,
+        title: blog.title,
+        link: blogId,
+        type: "blog",
+        senderAvatar: req.user.avatar,
+        content: ` reacted to your post with ${name}`
+      });
+      await notify.save();
+    }
   }
   const count = await Reaction.find({ blogId }).countDocuments();
   const data = { count, type: reaction.type };

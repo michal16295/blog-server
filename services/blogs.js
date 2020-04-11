@@ -2,7 +2,53 @@ const { UserGroup } = require("../models/userGroup");
 const { UserBlog } = require("../models/userBlog");
 const { GroupBlog } = require("../models/groupBlog");
 const { Blog } = require("../models/blogs");
+const { Notification } = require("../models/notification");
 const ITEMS_PER_PAGE = 3;
+
+module.exports.blogGroupRel = async (groups, id) => {
+  let ub = [];
+  for (let i = 0; i < groups.length; i++) {
+    const group = await Group.findOne({ title: groups[i] });
+    const rel = {
+      groupId: group._id,
+      blogId: id
+    };
+    ub.push(rel);
+  }
+  return ub;
+};
+
+module.exports.UserBlogCreation = async (owner, data, id, avatar) => {
+  let flag = false;
+  for (let i = 0; i < data.length; i++) {
+    if (owner === data[i]) flag = true;
+  }
+  if (flag === false) data.push(owner);
+  let ug = [];
+  let notifications = [];
+  for (let i = 0; i < data.length; i++) {
+    const rel = {
+      blogId: id,
+      userName: data[i]
+    };
+    ug.push(rel);
+    if (owner !== data[i]) {
+      const blog = await Blog.findById(id);
+      const notify = new Notification({
+        from: owner,
+        to: data[i],
+        senderAvatar: avatar,
+        title: blog.title,
+        link: id,
+        type: "blog",
+        content: " added you to a post"
+      });
+      notifications.push(notify);
+    }
+  }
+  await Notification.insertMany(notifications);
+  return ug;
+};
 
 module.exports.getOwnersBlogs = async (search, offset, userName) => {
   const data = await Blog.aggregate([
