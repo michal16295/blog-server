@@ -11,14 +11,14 @@ module.exports.blogGroupRel = async (groups, id) => {
     const group = await Group.findOne({ title: groups[i] });
     const rel = {
       groupId: group._id,
-      blogId: id
+      blogId: id,
     };
     ub.push(rel);
   }
   return ub;
 };
 
-module.exports.UserBlogCreation = async (owner, data, id, avatar) => {
+module.exports.UserBlogCreation = async (owner, data, id) => {
   let flag = false;
   for (let i = 0; i < data.length; i++) {
     if (owner === data[i]) flag = true;
@@ -29,7 +29,7 @@ module.exports.UserBlogCreation = async (owner, data, id, avatar) => {
   for (let i = 0; i < data.length; i++) {
     const rel = {
       blogId: id,
-      userName: data[i]
+      userName: data[i],
     };
     ug.push(rel);
     if (owner !== data[i]) {
@@ -37,11 +37,10 @@ module.exports.UserBlogCreation = async (owner, data, id, avatar) => {
       const notify = new Notification({
         from: owner,
         to: data[i],
-        senderAvatar: avatar,
         title: blog.title,
         link: id,
         type: "blog",
-        content: " added you to a post"
+        content: " added you to a post",
       });
       notifications.push(notify);
     }
@@ -55,15 +54,15 @@ module.exports.getOwnersBlogs = async (search, offset, userName) => {
     {
       $match: {
         title: { $regex: search, $options: "i" },
-        owner: userName
-      }
+        owner: userName,
+      },
     },
     {
-      $sort: { date: -1 }
+      $sort: { date: -1 },
     },
     {
-      $facet: this.facet(offset)
-    }
+      $facet: this.facet(offset),
+    },
   ]);
   return data;
 };
@@ -72,19 +71,19 @@ module.exports.getAllBlogs = async (search, offset, currentUser) => {
   let matchObj = this.searchObj(search);
   const data = await Blog.aggregate([
     {
-      $match: matchObj
+      $match: matchObj,
     },
     {
       $match: {
-        _id: { $in: blogs }
-      }
+        _id: { $in: blogs },
+      },
     },
     {
-      $sort: { date: -1 }
+      $sort: { date: -1 },
     },
     {
-      $facet: this.facet(offset)
-    }
+      $facet: this.facet(offset),
+    },
   ]);
   return data;
 };
@@ -102,21 +101,21 @@ module.exports.getUsersBlogs = async (
         $or: [
           {
             permission: "public",
-            owner: userName
+            owner: userName,
           },
           {
             owner: userName,
-            _id: { $in: blogs }
-          }
-        ]
-      }
+            _id: { $in: blogs },
+          },
+        ],
+      },
     },
     {
-      $sort: { date: -1 }
+      $sort: { date: -1 },
     },
     {
-      $facet: this.facet(offset)
-    }
+      $facet: this.facet(offset),
+    },
   ]);
   return data;
 };
@@ -125,44 +124,44 @@ module.exports.getPublicBlogs = async (search, offset) => {
     {
       $match: {
         title: { $regex: search, $options: "i" },
-        permission: "public"
-      }
+        permission: "public",
+      },
     },
     {
-      $sort: { date: -1 }
+      $sort: { date: -1 },
     },
     {
-      $facet: this.facet(offset)
-    }
+      $facet: this.facet(offset),
+    },
   ]);
   return data;
 };
-module.exports.authBlogs = async currentUser => {
+module.exports.authBlogs = async (currentUser) => {
   //current user groups
   let userGroups = await UserGroup.find({ userName: currentUser });
-  userGroups = userGroups.map(i => i.groupId);
+  userGroups = userGroups.map((i) => i.groupId);
 
   //blogs the current user can view
   let userBlogs = await UserBlog.find({ userName: currentUser });
-  userBlogs = userBlogs.map(i => i.blogId);
+  userBlogs = userBlogs.map((i) => i.blogId);
 
   let groupBlogs = await GroupBlog.aggregate([
     {
       $match: {
-        groupId: { $in: userGroups }
-      }
-    }
+        groupId: { $in: userGroups },
+      },
+    },
   ]);
   //public blogs
   let publicBlogs = await Blog.find({ permission: "public" });
-  publicBlogs = publicBlogs.map(i => i._id);
+  publicBlogs = publicBlogs.map((i) => i._id);
 
-  groupBlogs = groupBlogs.map(i => i.blogId);
+  groupBlogs = groupBlogs.map((i) => i.blogId);
   let blogs = userBlogs.concat(groupBlogs);
   blogs = blogs.concat(publicBlogs);
   return blogs;
 };
-module.exports.searchObj = search => {
+module.exports.searchObj = (search) => {
   // Match object to aggregate with
   // Set it to match with name regex
   let matchObject = {};
@@ -172,23 +171,23 @@ module.exports.searchObj = search => {
     matchObject = {
       title: {
         $regex: search,
-        $options: "i"
-      }
+        $options: "i",
+      },
     };
   }
   return matchObject;
 };
-module.exports.facet = offset => {
+module.exports.facet = (offset) => {
   let obj = {
     metadata: [
       { $count: "total" },
-      { $addFields: { ITEMS_PER_PAGE: ITEMS_PER_PAGE } }
+      { $addFields: { ITEMS_PER_PAGE: ITEMS_PER_PAGE } },
     ],
-    data: [{ $skip: offset }, { $limit: ITEMS_PER_PAGE }]
+    data: [{ $skip: offset }, { $limit: ITEMS_PER_PAGE }],
   };
   return obj;
 };
-module.exports.isValid = db => {
+module.exports.isValid = (db) => {
   return !db[0].data || db[0].data.length === 0 || db[0].data === undefined;
 };
 module.exports.isAuthotrized = async (blogId, userName) => {

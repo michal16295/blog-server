@@ -5,25 +5,22 @@ const reactiontSchema = new Schema({
   userName: {
     type: String,
     ref: "User",
-    required: true
+    required: true,
   },
   date: {
     type: Date,
-    default: Date.now()
+    default: Date.now,
   },
   type: {
     type: String,
     enum: ["like", "love", "angry", "sad", "wow", "haha"],
-    required: true
+    required: true,
   },
   blogId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Blog",
-    required: true
+    required: true,
   },
-  ownerAvatar: {
-    type: String
-  }
 });
 
 const Reaction = mongoose.model("Reaction", reactiontSchema);

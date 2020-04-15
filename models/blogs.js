@@ -5,34 +5,31 @@ const blogSchema = new Schema({
   title: {
     type: String,
     minlength: 2,
-    required: true
+    required: true,
   },
   description: {
     type: String,
-    maxlength: 10000
+    maxlength: 10000,
   },
   date: {
     type: Date,
-    default: Date.now()
+    default: Date.now,
   },
   owner: {
     type: String,
     required: true,
-    ref: "User"
+    ref: "User",
   },
   permission: {
     type: String,
     enum: ["private", "public"],
-    required: true
+    required: true,
   },
   tags: {
     type: Array,
     minlength: 1,
-    maxlength: 10
+    maxlength: 10,
   },
-  ownerAvatar: {
-    type: String
-  }
 });
 
 const Blog = mongoose.model("Blog", blogSchema);

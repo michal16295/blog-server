@@ -4,9 +4,10 @@ const blogs = require("../routes/blogs");
 const reactions = require("../routes/reactions");
 const comments = require("../routes/comments");
 const notifications = require("../routes/notifications");
+const chat = require("../routes/chat");
 const express = require("express");
 
-module.exports = app => {
+module.exports = (app) => {
   app.use(express.json());
   app.use("/users", users);
   app.use("/groups", groups);
@@ -14,4 +15,5 @@ module.exports = app => {
   app.use("/reactions", reactions);
   app.use("/comments", comments);
   app.use("/notifications", notifications);
+  app.use("/chat", chat);
 };

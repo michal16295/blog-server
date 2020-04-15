@@ -5,24 +5,21 @@ const groupSchema = new Schema({
   title: {
     type: String,
     minlength: 2,
-    required: true
+    required: true,
   },
   description: {
     type: String,
-    maxlength: 200
+    maxlength: 200,
   },
   date: {
     type: Date,
-    default: Date.now()
+    default: Date.now,
   },
   owner: {
     type: String,
     required: true,
-    ref: "User"
+    ref: "User",
   },
-  ownerAvatar: {
-    type: String
-  }
 });
 
 const Group = mongoose.model("Group", groupSchema);

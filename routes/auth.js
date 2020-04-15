@@ -10,6 +10,7 @@ const { Reaction } = require("../models/reaction");
 const { Comment } = require("../models/comments");
 const { Group } = require("../models/groups");
 const { Blog } = require("../models/blogs");
+const { GroupBlog } = require("../models/groupBlog");
 const bcrypt = require("bcrypt");
 const jwtDecode = require("jwt-decode");
 const auth = require("../middlewares/auth");
@@ -17,12 +18,12 @@ const { getAll, isValid } = require("../services/aggregate");
 const { generateRandomAvatar } = require("../avatar/generateAvatar");
 const { updateAvatar } = require("../services/common");
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 4;
 
 router.get(
   "/auth/google",
   passport.authenticate("google", {
-    scope: ["profile", "email"]
+    scope: ["profile", "email"],
   })
 );
 router.get(
@@ -64,7 +65,7 @@ router.post("/register", async (req, res) => {
     email: req.body.email,
     password: newPassword,
     userName: req.body.userName,
-    avatar
+    avatar,
   });
   await user.save();
   const token = user.generateAuthToken();
@@ -81,7 +82,19 @@ router.delete("/deleteAccount", [auth], async (req, res) => {
     await UserBlog.deleteMany({ userName });
     await Reaction.deleteMany({ userName });
     await Comment.deleteMany({ userName });
+    let blogs = await Blog.find({ owner: userName });
+    blogs = blogs.map((i) => i._id);
+    await UserBlog.deleteMany({ blogId: { $in: blogs } });
+    await Reaction.deleteMany({ blogId: { $in: blogs } });
+    await Comment.deleteMany({ blogId: { $in: blogs } });
+    let groups = await GroupBlog.find({ blogId: { $in: blogs } });
+    groups = groups.map((i) => groupId);
+    await UserGroup.deleteMany({ groupId: { $in: groups } });
+    await GroupBlog.deleteMany({ groupId: { $in: groups } });
     await Blog.deleteMany({ owner: userName });
+    let groups2 = await Group.find({ owner: userName });
+    groups2 = groups2.map((i) => i._id);
+    await UserGroup.deleteMany({ groupId: { $in: groups2 } });
     await Group.deleteMany({ owner: userName });
     await User.deleteOne({ _id });
     return res.status(c.SERVER_OK_HTTP_CODE).send("User deleted");
@@ -166,7 +179,7 @@ router.put("/edit/:id", async (req, res) => {
     firstName,
     lastName,
     email,
-    avatar
+    avatar,
   };
   await User.updateOne({ _id: req.params.id }, { $set: updatedUser });
   return res.status(c.SERVER_OK_HTTP_CODE).send(user);
@@ -191,6 +204,23 @@ router.put("/changePass/:id", async (req, res) => {
 router.get("/avatar/random", async (req, res) => {
   const newAvatar = generateRandomAvatar("Circle");
   return res.status(c.SERVER_OK_HTTP_CODE).send(newAvatar);
+});
+
+//GET AVATAR
+router.get("/getAvatar/:userName", async (req, res) => {
+  const { userName } = req.params;
+  try {
+    const user = await User.findOne({ userName });
+    if (!user)
+      return res.status(c.SERVER_NOT_FOUND_HTTP_CODE).send(c.USER_NOT_FOUND);
+    const data = {
+      avatar: user.avatar,
+    };
+    return res.status(c.SERVER_OK_HTTP_CODE).send(data);
+  } catch (err) {
+    console.log(err.message);
+    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
+  }
 });
 
 module.exports = router;

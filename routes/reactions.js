@@ -7,7 +7,7 @@ const { Blog } = require("../models/blogs");
 const auth = require("../middlewares/auth");
 const mongoose = require("mongoose");
 const { isValid } = require("../services/aggregate");
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 7;
 
 //SET NEW REACTION
 router.post("/setReaction", [auth], async (req, res) => {
@@ -15,7 +15,7 @@ router.post("/setReaction", [auth], async (req, res) => {
   var reaction = await Reaction.findOne({ blogId, userName });
   if (reaction) {
     const newReaction = {
-      type: name
+      type: name,
     };
     await Reaction.updateOne({ _id: reaction._id }, { $set: newReaction });
   } else {
@@ -23,7 +23,6 @@ router.post("/setReaction", [auth], async (req, res) => {
       blogId,
       userName,
       type: name,
-      ownerAvatar: req.user.avatar
     });
     await reaction.save();
     const blog = await Blog.findById(blogId);
@@ -34,8 +33,7 @@ router.post("/setReaction", [auth], async (req, res) => {
         title: blog.title,
         link: blogId,
         type: "blog",
-        senderAvatar: req.user.avatar,
-        content: ` reacted to your post with ${name}`
+        content: ` reacted to your post with ${name}`,
       });
       await notify.save();
     }
@@ -49,7 +47,7 @@ router.get("/currentUserReaction/:blogId", [auth], async (req, res) => {
   const { blogId } = req.params;
   const reaction = await Reaction.findOne({
     blogId,
-    userName: req.user.userName
+    userName: req.user.userName,
   });
   if (!reaction)
     return res.status(c.SERVER_NOT_FOUND_HTTP_CODE).json("No Reaction");
@@ -62,7 +60,7 @@ router.delete("/remove/:blogId/:userName", [auth], async (req, res) => {
     await Reaction.findOneAndDelete({ blogId, userName });
     const count = await Reaction.find({ blogId }).countDocuments();
     const data = {
-      count
+      count,
     };
     return res.status(c.SERVER_OK_HTTP_CODE).send(data);
   } catch (err) {
@@ -81,28 +79,44 @@ router.get("/getAll/:page/:blogId", async (req, res) => {
   let obj = {
     metadata: [
       { $count: "total" },
-      { $addFields: { ITEMS_PER_PAGE: ITEMS_PER_PAGE } }
+      { $addFields: { ITEMS_PER_PAGE: ITEMS_PER_PAGE } },
     ],
-    data: [{ $skip: offset }, { $limit: ITEMS_PER_PAGE }]
+    data: [{ $skip: offset }, { $limit: ITEMS_PER_PAGE }],
   };
   let data = await Reaction.aggregate([
     {
       $match: {
         type: { $regex: type, $options: "i" },
-        blogId: mongoose.Types.ObjectId(blogId)
-      }
+        blogId: mongoose.Types.ObjectId(blogId),
+      },
     },
     {
-      $facet: obj
-    }
+      $facet: obj,
+    },
   ]);
   const allCount = await Reaction.find({ blogId }).countDocuments();
   const response = {
     allCount,
-    data
+    data,
   };
   if (isValid(data))
     return res.status(c.SERVER_NOT_FOUND_HTTP_CODE).json("No Reactions");
   return res.status(c.SERVER_OK_HTTP_CODE).send(response);
+});
+
+//NUMBER OF REACTIONS
+router.get("/numOfReactions/:blogId", async (req, res) => {
+  const { blogId } = req.params;
+  try {
+    const count = await Reaction.find({ blogId }).countDocuments();
+
+    const data = {
+      count,
+      ITEMS_PER_PAGE,
+    };
+    return res.status(c.SERVER_OK_HTTP_CODE).send(data);
+  } catch (err) {
+    return res.status(c.SERVER_OK_HTTP_CODE).send(err.message);
+  }
 });
 module.exports = router;

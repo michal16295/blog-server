@@ -5,28 +5,25 @@ const commentSchema = new Schema({
   userName: {
     type: String,
     ref: "User",
-    required: true
+    required: true,
   },
   date: {
     type: Date,
-    default: Date.now()
+    default: Date.now,
   },
   update: {
-    type: Date
+    type: Date,
   },
   content: {
     type: String,
     required: true,
-    maxlength: 200
+    maxlength: 200,
   },
   blogId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Blog",
-    required: true
+    required: true,
   },
-  ownerAvatar: {
-    type: String
-  }
 });
 
 const Comment = mongoose.model("Comment", commentSchema);

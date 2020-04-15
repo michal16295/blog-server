@@ -5,14 +5,14 @@ const userBlogSchema = new Schema({
   userName: {
     type: String,
     ref: "User",
-    required: true
+    required: true,
   },
 
   blogId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Blog",
-    required: true
-  }
+    required: true,
+  },
 });
 
 const UserBlog = mongoose.model("UserBlog", userBlogSchema);

@@ -17,7 +17,7 @@ router.post("/create", [auth], async (req, res) => {
       userName,
       blogId,
       content: comment,
-      ownerAvatar: avatar
+      ownerAvatar: avatar,
     });
     await newComment.save();
     const blog = await Blog.findById(blogId);
@@ -25,18 +25,17 @@ router.post("/create", [auth], async (req, res) => {
       const notify = new Notification({
         from: userName,
         to: blog.owner,
-        senderAvatar: avatar,
         title: blog.title,
         link: blogId,
         type: "blog",
-        content: " left a comment on your post"
+        content: " left a comment on your post",
       });
       await notify.save();
     }
     const count = await Comment.find({ blogId }).countDocuments();
     const data = {
       count,
-      newComment
+      newComment,
     };
     return res.status(c.SERVER_OK_HTTP_CODE).send(data);
   } catch (err) {
@@ -52,23 +51,23 @@ router.get("/getAll/:page/:blogId", async (req, res) => {
   let obj = {
     metadata: [
       { $count: "total" },
-      { $addFields: { ITEMS_PER_PAGE: ITEMS_PER_PAGE } }
+      { $addFields: { ITEMS_PER_PAGE: ITEMS_PER_PAGE } },
     ],
-    data: [{ $skip: offset }, { $limit: ITEMS_PER_PAGE }]
+    data: [{ $skip: offset }, { $limit: ITEMS_PER_PAGE }],
   };
   try {
     let data = await Comment.aggregate([
       {
         $match: {
-          blogId: mongoose.Types.ObjectId(blogId)
-        }
+          blogId: mongoose.Types.ObjectId(blogId),
+        },
       },
       {
-        $sort: { date: -1 }
+        $sort: { date: -1 },
       },
       {
-        $facet: obj
-      }
+        $facet: obj,
+      },
     ]);
     return res.status(c.SERVER_OK_HTTP_CODE).send(data);
   } catch (err) {
@@ -83,7 +82,7 @@ router.put("/edit", [auth], async (req, res) => {
     return res.status(c.SERVER_NOT_FOUND_HTTP_CODE).json("Comment not found");
   let newComment = {
     update: Date.now(),
-    content
+    content,
   };
   try {
     await Comment.updateOne({ _id: commentId }, { $set: newComment });
@@ -102,11 +101,11 @@ router.delete("/delete/:id", [auth], async (req, res) => {
       return res.status(c.NOT_AUTHORIZED_HTTP_CODE).send(c.INVALID_TOKEN_ERROR);
     await Comment.findByIdAndDelete(req.params.id);
     const count = await Comment.find({
-      blogId: comment.blogId
+      blogId: comment.blogId,
     }).countDocuments();
     const data = {
       count: count,
-      comment
+      comment,
     };
     return res.status(c.SERVER_OK_HTTP_CODE).send(data);
   } catch (err) {

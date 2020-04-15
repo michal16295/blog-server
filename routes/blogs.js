@@ -19,7 +19,7 @@ const {
   getPublicBlogs,
   isAuthotrized,
   UserBlogCreation,
-  blogGroupRel
+  blogGroupRel,
 } = require("../services/blogs");
 const ITEMS_PER_PAGE = 3;
 
@@ -40,19 +40,19 @@ router.get("/getPost/:postId", async (req, res) => {
           .send(c.INVALID_TOKEN_ERROR);
     }
     let groupsId = await GroupBlog.find({ blogId: postId });
-    groupsId = groupsId.map(i => i.groupId);
+    groupsId = groupsId.map((i) => i.groupId);
     let groups = [];
     for (var i = 0; i < groupsId.length; i++) {
       let group = await Group.findById(groupsId[i]);
       groups.push(group.title);
     }
     let users = await UserBlog.find({ blogId: postId });
-    users = users.map(i => i.userName);
+    users = users.map((i) => i.userName);
 
     const response = {
       blog,
       users,
-      groups
+      groups,
     };
     return res.status(c.SERVER_OK_HTTP_CODE).send(response);
   } catch (err) {
@@ -69,15 +69,13 @@ router.post("/create", [auth], async (req, res) => {
     owner: req.body.owner,
     permission: req.body.permission,
     tags: req.body.tags,
-    ownerAvatar: req.user.avatar
   });
   await blog.save();
   if (req.body.permission === "private") {
     const userBlog = await UserBlogCreation(
       req.body.owner,
       req.body.members,
-      blog._id,
-      req.user.avatar
+      blog._id
     );
     await UserBlog.insertMany(userBlog);
     const groupBlog = await blogGroupRel(req.body.groups, blog._id);
@@ -171,16 +169,15 @@ router.put("/edit", [auth], async (req, res) => {
   const newBlog = {
     title: req.body.title,
     description: req.body.description,
-    permission: req.body.permission
+    permission: req.body.permission,
   };
   if (req.body.permission === "private") {
-    const userBlog = await relCreation(
+    const userBlog = await UserBlogCreation(
       req.body.owner,
       req.body.members,
-      "userName",
-      "blogId",
       id
     );
+
     await UserBlog.insertMany(userBlog);
     const groupBlog = await blogGroupRel(req.body.groups, id);
     await GroupBlog.insertMany(groupBlog);

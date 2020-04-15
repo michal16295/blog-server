@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const notificationSchema = new Schema({
+const messageSchema = new Schema({
   from: {
     type: String,
     ref: "User",
@@ -16,25 +16,15 @@ const notificationSchema = new Schema({
     ref: "User",
     required: true,
   },
-  content: {
+  message: {
     type: String,
     required: true,
-    maxlength: 200,
   },
   isViewed: {
     type: Boolean,
     default: false,
   },
-  type: {
-    type: String,
-  },
-  link: {
-    type: String,
-  },
-  title: {
-    type: String,
-  },
 });
 
-const Notification = mongoose.model("Notification", notificationSchema);
-exports.Notification = Notification;
+const Message = mongoose.model("Message", messageSchema);
+exports.Message = Message;

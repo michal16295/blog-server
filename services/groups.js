@@ -2,7 +2,7 @@
 const { Group } = require("../models/groups");
 const { Notification } = require("../models/notification");
 
-module.exports.UserGroupCreate = async (owner, data, id, avatar) => {
+module.exports.UserGroupCreate = async (owner, data, id) => {
   let flag = false;
   for (let i = 0; i < data.length; i++) {
     if (owner === data[i]) flag = true;
@@ -13,7 +13,7 @@ module.exports.UserGroupCreate = async (owner, data, id, avatar) => {
   for (let i = 0; i < data.length; i++) {
     const rel = {
       groupId: id,
-      userName: data[i]
+      userName: data[i],
     };
     ug.push(rel);
     if (owner !== data[i]) {
@@ -21,11 +21,10 @@ module.exports.UserGroupCreate = async (owner, data, id, avatar) => {
       const notify = new Notification({
         from: owner,
         to: data[i],
-        senderAvatar: avatar,
         title: group.title,
         link: id,
         type: "group",
-        content: " added you to a group"
+        content: " added you to a group",
       });
       notifications.push(notify);
     }

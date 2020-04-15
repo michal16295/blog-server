@@ -14,31 +14,31 @@ router.get("/:page", [auth], async (req, res) => {
   let obj = {
     metadata: [
       { $count: "total" },
-      { $addFields: { ITEMS_PER_PAGE: ITEMS_PER_PAGE } }
+      { $addFields: { ITEMS_PER_PAGE: ITEMS_PER_PAGE } },
     ],
-    data: [{ $skip: offset }, { $limit: ITEMS_PER_PAGE }]
+    data: [{ $skip: offset }, { $limit: ITEMS_PER_PAGE }],
   };
   try {
     let data = await Notification.aggregate([
       {
         $match: {
-          to: userName
-        }
+          to: userName,
+        },
       },
       {
-        $sort: { date: -1 }
+        $sort: { date: -1 },
       },
       {
-        $facet: obj
-      }
+        $facet: obj,
+      },
     ]);
     const notViewed = await Notification.find({
       to: userName,
-      isViewed: false
+      isViewed: false,
     }).countDocuments();
     const response = {
       data,
-      notViewed
+      notViewed,
     };
     return res.status(c.SERVER_OK_HTTP_CODE).send(response);
   } catch (err) {
@@ -46,14 +46,23 @@ router.get("/:page", [auth], async (req, res) => {
   }
 });
 //CHANGE VIEWED
-router.put("/viewed", [auth], async (req, res) => {
+router.put("/viewed/:id", [auth], async (req, res) => {
   const { userName } = req.user;
+  const { id } = req.params;
   const newNotify = {
-    isViewed: true
+    isViewed: true,
   };
   try {
-    await Notification.updateMany({ to: userName }, { $set: newNotify });
-    return res.status(c.SERVER_OK_HTTP_CODE).send("Notification updated");
+    await Notification.updateOne(
+      { _id: id, to: userName },
+      { $set: newNotify }
+    );
+    const notViewed = await Notification.find({
+      to: userName,
+      isViewed: false,
+    }).countDocuments();
+    const data = { notViewed };
+    return res.status(c.SERVER_OK_HTTP_CODE).send(data);
   } catch (err) {
     return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
   }
