@@ -11,13 +11,12 @@ const ITEMS_PER_PAGE = 10;
 //CREATE COMMENT
 router.post("/create", [auth], async (req, res) => {
   const { blogId, comment } = req.body;
-  const { userName, avatar } = req.user;
+  const { userName } = req.user;
   try {
     let newComment = new Comment({
       userName,
       blogId,
       content: comment,
-      ownerAvatar: avatar,
     });
     await newComment.save();
     const blog = await Blog.findById(blogId);
