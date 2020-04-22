@@ -24,6 +24,14 @@ const chatSchema = new Schema({
     type: String,
     required: true,
   },
+  isBlocked: {
+    type: Boolean,
+    default: false,
+  },
+  blocker: {
+    type: String,
+    ref: "User",
+  },
 });
 
 const Chat = mongoose.model("Chat", chatSchema);

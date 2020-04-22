@@ -14,12 +14,6 @@ router.post("/send", [auth], async (req, res) => {
   if (reciever === userName)
     return res.status(c.SERVER_ERROR_HTTP_CODE).send("Cant Message Yourself");
   try {
-    const msg = new Message({
-      to: reciever,
-      message,
-      from: userName,
-    });
-    await msg.save();
     const cond = {
       $or: [
         { user1: reciever, user2: userName },
@@ -35,12 +29,22 @@ router.post("/send", [auth], async (req, res) => {
       });
       await newChat.save();
     } else {
+      if (chat.isBlocked)
+        return res
+          .status(c.SERVER_ERROR_HTTP_CODE)
+          .send("Cant send a message to blocked user");
       const updatedChat = {
         date: msg.date,
         message,
       };
       await Chat.updateOne(cond, { $set: updatedChat });
     }
+    const msg = new Message({
+      to: reciever,
+      message,
+      from: userName,
+    });
+    await msg.save();
     return res.status(c.SERVER_OK_HTTP_CODE).send(msg);
   } catch (err) {
     return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
@@ -167,6 +171,40 @@ router.get("/unreadMsgs/:reciever", [auth], async (req, res) => {
       notViewed: messages.length,
     };
     return res.status(c.SERVER_OK_HTTP_CODE).send(data);
+  } catch (err) {
+    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
+  }
+});
+//BLOCK USER
+router.put("/block/:userName", [auth], async (req, res) => {
+  const blocker = req.user.userName;
+  const blocked = req.params.userName;
+  const cond = {
+    $or: [
+      { user1: blocker, user2: blocked },
+      { user1: blocked, user2: blocker },
+    ],
+  };
+  try {
+    await Chat.updateOne(cond, { $set: { isBlocked: true, blocker } });
+    return res.status(c.SERVER_OK_HTTP_CODE).send("User Is Blocked");
+  } catch (err) {
+    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
+  }
+});
+//UBBLOCK USER
+router.put("/unblock/:userName", [auth], async (req, res) => {
+  const blocker = req.user.userName;
+  const blocked = req.params.userName;
+  const cond = {
+    $or: [
+      { user1: blocker, user2: blocked },
+      { user1: blocked, user2: blocker },
+    ],
+  };
+  try {
+    await Chat.updateOne(cond, { $set: { isBlocked: false } });
+    return res.status(c.SERVER_OK_HTTP_CODE).send("User Is Unblocked");
   } catch (err) {
     return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
   }
