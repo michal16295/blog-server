@@ -109,7 +109,6 @@ router.get("/numOfReactions/:blogId", async (req, res) => {
   const { blogId } = req.params;
   try {
     const count = await Reaction.find({ blogId }).countDocuments();
-
     const data = {
       count,
       ITEMS_PER_PAGE,

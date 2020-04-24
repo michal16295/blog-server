@@ -75,8 +75,15 @@ router.post("/register", async (req, res) => {
     .send(user);
 });
 //DELETE USER
-router.delete("/deleteAccount", [auth], async (req, res) => {
+router.post("/deleteAccount", [auth], async (req, res) => {
+  const { password } = req.body;
   const { _id, userName } = req.user;
+  if (req.body.userName !== userName)
+    return res.status(c.SERVER_ERROR_HTTP_CODE).json(c.USER_LOGIN_FAILED);
+  const user = await User.findOne({ userName });
+  const validPassword = await bcrypt.compare(password, user.password);
+  if (!validPassword)
+    return res.status(c.SERVER_ERROR_HTTP_CODE).json(c.USER_LOGIN_FAILED);
   try {
     await UserGroup.deleteMany({ userName });
     await UserBlog.deleteMany({ userName });
