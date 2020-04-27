@@ -25,7 +25,6 @@ router.post("/send", [auth], async (req, res) => {
       return res
         .status(c.SERVER_ERROR_HTTP_CODE)
         .send("Cant send a message to blocked user");
-
     const msg = new Message({
       to: reciever,
       message,
@@ -206,9 +205,33 @@ router.put("/unblock/:userName", [auth], async (req, res) => {
   };
   try {
     await Chat.updateOne(cond, { $set: { isBlocked: false } });
-    return res.status(c.SERVER_OK_HTTP_CODE).send("User Is Unblocked");
+    return res.status(c.SERVER_OK_HTTP_CODE).send({ user: blocked });
   } catch (err) {
     console.log(err);
+    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
+  }
+});
+//LIST OF BLOCKED USERS
+router.get("/blockedList", [auth], async (req, res) => {
+  const { userName } = req.user;
+  try {
+    const blockedUsers = await Chat.find({
+      blocker: userName,
+      isBlocked: true,
+    });
+    if (!blockedUsers)
+      return res
+        .status(c.SERVER_NOT_FOUND_HTTP_CODE)
+        .send("You Did Not Block Anyone");
+    let response = [];
+    for (var i = 0; i < blockedUsers.length; i++) {
+      if (blockedUsers[i].user1 === userName)
+        response.push(blockedUsers[i].user2);
+      else response.push(blockedUsers[i].user1);
+    }
+    const users = await User.find({ userName: { $in: response } });
+    return res.status(c.SERVER_OK_HTTP_CODE).send(users);
+  } catch (err) {
     return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
   }
 });

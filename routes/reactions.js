@@ -7,6 +7,7 @@ const { Blog } = require("../models/blogs");
 const auth = require("../middlewares/auth");
 const mongoose = require("mongoose");
 const { isValid } = require("../services/aggregate");
+const { Settings } = require("../models/settings");
 const ITEMS_PER_PAGE = 7;
 
 //SET NEW REACTION
@@ -26,16 +27,19 @@ router.post("/setReaction", [auth], async (req, res) => {
     });
     await reaction.save();
     const blog = await Blog.findById(blogId);
-    if (userName !== blog.owner) {
-      const notify = new Notification({
-        from: userName,
-        to: blog.owner,
-        title: blog.title,
-        link: blogId,
-        type: "blog",
-        content: ` reacted to your post with ${name}`,
-      });
-      await notify.save();
+    const settings = await Settings.findOne({ user: blog.owner });
+    if (settings.web.includes("reactions")) {
+      if (userName !== blog.owner) {
+        const notify = new Notification({
+          from: userName,
+          to: blog.owner,
+          title: blog.title,
+          link: blogId,
+          type: "blog",
+          content: ` reacted to your post with ${name}`,
+        });
+        await notify.save();
+      }
     }
   }
   const count = await Reaction.find({ blogId }).countDocuments();

@@ -6,6 +6,7 @@ const auth = require("../middlewares/auth");
 const mongoose = require("mongoose");
 const { Blog } = require("../models/blogs");
 const { Notification } = require("../models/notification");
+const { Settings } = require("../models/settings");
 const ITEMS_PER_PAGE = 10;
 
 //CREATE COMMENT
@@ -20,16 +21,19 @@ router.post("/create", [auth], async (req, res) => {
     });
     await newComment.save();
     const blog = await Blog.findById(blogId);
-    if (userName !== blog.owner) {
-      const notify = new Notification({
-        from: userName,
-        to: blog.owner,
-        title: blog.title,
-        link: blogId,
-        type: "blog",
-        content: " left a comment on your post",
-      });
-      await notify.save();
+    const settings = await Settings.findOne({ user: blog.owner });
+    if (settings.web.includes("comments")) {
+      if (userName !== blog.owner) {
+        const notify = new Notification({
+          from: userName,
+          to: blog.owner,
+          title: blog.title,
+          link: blogId,
+          type: "blog",
+          content: " left a comment on your post",
+        });
+        await notify.save();
+      }
     }
     const count = await Comment.find({ blogId }).countDocuments();
     const data = {

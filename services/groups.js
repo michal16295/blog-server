@@ -1,6 +1,7 @@
 //ADDING MEMBERS
 const { Group } = require("../models/groups");
 const { Notification } = require("../models/notification");
+const { Settings } = require("../models/settings");
 
 module.exports.UserGroupCreate = async (owner, data, id) => {
   let flag = false;
@@ -18,15 +19,18 @@ module.exports.UserGroupCreate = async (owner, data, id) => {
     ug.push(rel);
     if (owner !== data[i]) {
       const group = await Group.findById(id);
-      const notify = new Notification({
-        from: owner,
-        to: data[i],
-        title: group.title,
-        link: id,
-        type: "group",
-        content: " added you to a group",
-      });
-      notifications.push(notify);
+      const settings = await Settings.findOne({ user: data[i] });
+      if (settings.web.includes("groups")) {
+        const notify = new Notification({
+          from: owner,
+          to: data[i],
+          title: group.title,
+          link: id,
+          type: "group",
+          content: " added you to a group",
+        });
+        notifications.push(notify);
+      }
     }
   }
   await Notification.insertMany(notifications);

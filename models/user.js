@@ -12,11 +12,20 @@ const userSchema = new Schema({
   avatar: String,
   userName: {
     type: String,
-    unique: true
-  }
+    unique: true,
+  },
+  online: {
+    type: String,
+    default: "N",
+    enum: ["Y", "N"],
+  },
+  socketId: {
+    type: String,
+    index: true,
+  },
 });
 
-userSchema.methods.generateAuthToken = function() {
+userSchema.methods.generateAuthToken = function () {
   const token = jwt.sign(
     { _id: this._id, userName: this.userName, avatar: this.avatar },
     config.cookieKey

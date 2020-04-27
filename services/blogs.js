@@ -3,6 +3,7 @@ const { UserBlog } = require("../models/userBlog");
 const { GroupBlog } = require("../models/groupBlog");
 const { Blog } = require("../models/blogs");
 const { Notification } = require("../models/notification");
+const { Settings } = require("../models/settings");
 const ITEMS_PER_PAGE = 3;
 
 module.exports.blogGroupRel = async (groups, id) => {
@@ -34,15 +35,18 @@ module.exports.UserBlogCreation = async (owner, data, id) => {
     ug.push(rel);
     if (owner !== data[i]) {
       const blog = await Blog.findById(id);
-      const notify = new Notification({
-        from: owner,
-        to: data[i],
-        title: blog.title,
-        link: id,
-        type: "blog",
-        content: " added you to a post",
-      });
-      notifications.push(notify);
+      const settings = await Settings.findOne({ user: data[i] });
+      if (settings.web.includes("blogs")) {
+        const notify = new Notification({
+          from: owner,
+          to: data[i],
+          title: blog.title,
+          link: id,
+          type: "blog",
+          content: " added you to a post",
+        });
+        notifications.push(notify);
+      }
     }
   }
   await Notification.insertMany(notifications);

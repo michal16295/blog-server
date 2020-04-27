@@ -10,11 +10,12 @@ const auth = require("../middlewares/auth");
 const mongoose = require("mongoose");
 const { searchQuery, getAll, isValid } = require("../services/aggregate");
 const { UserGroupCreate } = require("../services/groups");
+const { Settings } = require("../models/settings");
 const ITEMS_PER_PAGE = 3;
 
 //CREATE A GROUP
 router.post("/create", [auth], async (req, res) => {
-  const { members, title, description, owner, ownerAvatar } = req.body;
+  const { members, title, description, owner } = req.body;
   const isExists = await Group.findOne({ title, owner: req.user.userName });
   if (isExists)
     return res.status(c.SERVER_ERROR_HTTP_CODE).json(c.GRUOP_ALREDY_EXIST);
@@ -24,10 +25,9 @@ router.post("/create", [auth], async (req, res) => {
       title,
       description,
       owner,
-      ownerAvatar
     });
     await group.save();
-    const ug = await UserGroupCreate(owner, members, group._id, ownerAvatar);
+    const ug = await UserGroupCreate(owner, members, group._id);
     await UserGroup.insertMany(ug);
     return res.status(c.SERVER_OK_HTTP_CODE).send(group);
   } catch (ex) {
@@ -65,7 +65,7 @@ router.put("/edit", [auth], async (req, res) => {
   }
   const newGroup = {
     title: req.body.title,
-    description: req.body.description
+    description: req.body.description,
   };
   await Group.updateOne({ _id: req.body.groupId }, { $set: newGroup });
   return res.status(c.SERVER_OK_HTTP_CODE).json("Group updated successfully");
@@ -78,7 +78,7 @@ router.delete("/removeMember/:groupId/:member", [auth], async (req, res) => {
   if (!group) res.status(c.SERVER_NOT_FOUND_HTTP_CODE).json(c.GROUP_NOT_FOUND);
   const userGroup = await UserGroup.findOne({
     groupId: groupId,
-    userName: member
+    userName: member,
   });
   if (!userGroup)
     res.status(c.SERVER_NOT_FOUND_HTTP_CODE).json("User Not In This Group!");
@@ -96,7 +96,7 @@ router.post("/addMember/:groupId/:member", [auth], async (req, res) => {
     return res.status(c.NOT_AUTHORIZED_HTTP_CODE).json(c.INVALID_TOKEN_ERROR);
   const userGroup = await UserGroup.findOne({
     groupId: groupId,
-    userName: member
+    userName: member,
   });
   if (userGroup)
     return res
@@ -104,7 +104,7 @@ router.post("/addMember/:groupId/:member", [auth], async (req, res) => {
       .json(c.USER_ALREADY_IN_THE_GROUP);
   const ug = new UserGroup({
     groupId: groupId,
-    userName: member
+    userName: member,
   });
   await ug.save();
   return res.status(c.SERVER_OK_HTTP_CODE).json("Member Added successfully");
@@ -133,7 +133,7 @@ router.get("/all/:page/:userName", async (req, res) => {
   const cusrrentPage = parseInt(req.params.page) || 1;
   const offset = ITEMS_PER_PAGE * (cusrrentPage - 1);
   const usersGroups = await UserGroup.find({ userName: req.params.userName });
-  const groupIds = usersGroups.map(id => id.groupId);
+  const groupIds = usersGroups.map((id) => id.groupId);
   const groups = await searchQuery(
     Group,
     groupIds,
@@ -157,7 +157,7 @@ router.get("/members/:page/:groupId", async (req, res) => {
   const cusrrentPage = parseInt(req.params.page) || 1;
   const offset = ITEMS_PER_PAGE * (cusrrentPage - 1);
   const usersGroups = await UserGroup.find({ groupId: req.params.groupId });
-  const userNames = usersGroups.map(i => i.userName);
+  const userNames = usersGroups.map((i) => i.userName);
   userNames.splice(userNames.indexOf(group.owner), 1);
   const members = await searchQuery(
     User,
