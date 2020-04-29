@@ -7,50 +7,6 @@ const { User } = require("../models/user");
 const auth = require("../middlewares/auth");
 const ITEMS_PER_PAGE = 30;
 
-//SEND MESSAGE
-router.post("/send", [auth], async (req, res) => {
-  const { reciever, message } = req.body;
-  const { userName } = req.user;
-  if (reciever === userName)
-    return res.status(c.SERVER_ERROR_HTTP_CODE).send("Cant Message Yourself");
-  try {
-    const cond = {
-      $or: [
-        { user1: reciever, user2: userName },
-        { user1: userName, user2: reciever },
-      ],
-    };
-    const chat = await Chat.findOne(cond);
-    if (chat.isBlocked)
-      return res
-        .status(c.SERVER_ERROR_HTTP_CODE)
-        .send("Cant send a message to blocked user");
-    const msg = new Message({
-      to: reciever,
-      message,
-      from: userName,
-    });
-    await msg.save();
-    if (!chat) {
-      let newChat = new Chat({
-        user1: reciever,
-        user2: userName,
-        message,
-      });
-      await newChat.save();
-    } else {
-      const updatedChat = {
-        date: msg.date,
-        message,
-      };
-      await Chat.updateOne(cond, { $set: updatedChat });
-    }
-    return res.status(c.SERVER_OK_HTTP_CODE).send(msg);
-  } catch (err) {
-    console.log(err);
-    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
-  }
-});
 //GET MESSAGES
 router.get("/getMessages/:reciever/:page", [auth], async (req, res) => {
   const { reciever, page } = req.params;
@@ -176,23 +132,7 @@ router.get("/unreadMsgs/:reciever", [auth], async (req, res) => {
     return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
   }
 });
-//BLOCK USER
-router.put("/block/:userName", [auth], async (req, res) => {
-  const blocker = req.user.userName;
-  const blocked = req.params.userName;
-  const cond = {
-    $or: [
-      { user1: blocker, user2: blocked },
-      { user1: blocked, user2: blocker },
-    ],
-  };
-  try {
-    await Chat.updateOne(cond, { $set: { isBlocked: true, blocker } });
-    return res.status(c.SERVER_OK_HTTP_CODE).send("User Is Blocked");
-  } catch (err) {
-    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
-  }
-});
+
 //UBBLOCK USER
 router.put("/unblock/:userName", [auth], async (req, res) => {
   const blocker = req.user.userName;

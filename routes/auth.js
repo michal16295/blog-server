@@ -66,6 +66,7 @@ router.post("/register", async (req, res) => {
     password: newPassword,
     userName: req.body.userName,
     avatar,
+    online: "Y",
   });
   await user.save();
   const token = user.generateAuthToken();
@@ -122,6 +123,12 @@ router.post("/login", async (req, res) => {
   const validPassword = await bcrypt.compare(req.body.password, user.password);
   if (!validPassword)
     return res.status(c.SERVER_ERROR_HTTP_CODE).json(c.USER_LOGIN_FAILED);
+  try {
+    await User.updateOne({ _id: user._id }, { $set: { online: "Y" } });
+  } catch (err) {
+    console.log(err);
+  }
+
   const token = user.generateAuthToken();
   res
     .header("x-auth-token", token)
@@ -229,5 +236,14 @@ router.get("/getAvatar/:userName", async (req, res) => {
     return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
   }
 });
-
+//LOGOUT
+router.put("/logout/:userName", async (req, res) => {
+  const { userName } = req.params;
+  try {
+    await User.updateOne({ userName }, { $set: { online: "N" } });
+    return res.status(c.SERVER_OK_HTTP_CODE).send("Logout Success");
+  } catch (err) {
+    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
+  }
+});
 module.exports = router;
