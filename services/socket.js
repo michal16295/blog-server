@@ -80,9 +80,9 @@ module.exports.logout = async (userName) => {
   }
   return res;
 };
-module.exports.blockUser = async (data) => {
+module.exports.toggleBlockUser = async (data) => {
   let res = {};
-  const { blocker, blocked } = data;
+  const { blocker, blocked, isBlocked } = data;
   const cond = {
     $or: [
       { user1: blocker, user2: blocked },
@@ -90,8 +90,9 @@ module.exports.blockUser = async (data) => {
     ],
   };
   try {
-    await Chat.updateOne(cond, { $set: { isBlocked: true, blocker } });
-    return (res.success = "User Is Blocked");
+    await Chat.updateOne(cond, { $set: { isBlocked, blocker } });
+    if (isBlocked) return (res.success = "User Is Blocked");
+    if (!isBlocked) return (res.success = "User Is Unblocked");
   } catch (err) {
     return (res.error = err.message);
   }

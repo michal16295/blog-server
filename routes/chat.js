@@ -47,12 +47,13 @@ router.get("/getMessages/:reciever/:page", [auth], async (req, res) => {
         },
       },
       {
-        $sort: { date: 1 },
+        $sort: { date: -1 },
       },
       {
         $facet: obj,
       },
     ]);
+    data[0].data = data[0].data.reverse();
     return res.status(c.SERVER_OK_HTTP_CODE).send(data);
   } catch (err) {
     return res.status(c.SERVER_ERROR_HTTP_CODE).json(err.message);

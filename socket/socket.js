@@ -90,14 +90,13 @@ function socketEvents(io) {
     });
 
     /**block user */
-    socket.on("block", async (data) => {
+    socket.on("toggleBlock", async (data) => {
       const toSocketId = await socketServices.getSocketId(data.blocked);
-      console.log(data);
-      const block = await socketServices.blockUser(data);
-      //  console.log(block);
+      const block = await socketServices.toggleBlockUser(data);
       io.to(toSocketId).emit(`user-block-response`, {
         error: false,
         blocker: data.blocker,
+        isBlocked: data.isBlocked,
       });
     });
   });
