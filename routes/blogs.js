@@ -63,6 +63,7 @@ router.get("/getPost/:postId", async (req, res) => {
 //CREATE BLOG
 router.post("/create", [auth], async (req, res) => {
   //BLOG CREATION
+  console.log(req.body.permission);
   const blog = new Blog({
     title: req.body.title,
     description: req.body.description,

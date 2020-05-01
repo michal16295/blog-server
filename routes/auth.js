@@ -11,6 +11,7 @@ const { Comment } = require("../models/comments");
 const { Group } = require("../models/groups");
 const { Blog } = require("../models/blogs");
 const { GroupBlog } = require("../models/groupBlog");
+const { Settings } = require("../models/settings");
 const bcrypt = require("bcrypt");
 const jwtDecode = require("jwt-decode");
 const auth = require("../middlewares/auth");
@@ -69,6 +70,13 @@ router.post("/register", async (req, res) => {
     online: "Y",
   });
   await user.save();
+  let arr = ["groups", "blogs", "comments", "reactions"];
+  settings = new Settings({
+    user: req.body.userName,
+    web: arr,
+    email: arr,
+  });
+  await settings.save();
   const token = user.generateAuthToken();
   res
     .header("x-auth-token", token)

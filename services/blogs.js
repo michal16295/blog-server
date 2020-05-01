@@ -1,8 +1,10 @@
 const { UserGroup } = require("../models/userGroup");
 const { UserBlog } = require("../models/userBlog");
+const { Group } = require("../models/groups");
 const { GroupBlog } = require("../models/groupBlog");
 const { Blog } = require("../models/blogs");
 const { Notification } = require("../models/notification");
+const { createNotifications } = require("../services/notifications");
 const { Settings } = require("../models/settings");
 const ITEMS_PER_PAGE = 3;
 
@@ -36,15 +38,16 @@ module.exports.UserBlogCreation = async (owner, data, id) => {
     if (owner !== data[i]) {
       const blog = await Blog.findById(id);
       const settings = await Settings.findOne({ user: data[i] });
-      if (settings.web.includes("blogs")) {
-        const notify = new Notification({
+      if (settings.web && settings.web.includes("blogs")) {
+        const payload = {
           from: owner,
           to: data[i],
           title: blog.title,
           link: id,
           type: "blog",
           content: " added you to a post",
-        });
+        };
+        const notify = await createNotifications(payload);
         notifications.push(notify);
       }
     }

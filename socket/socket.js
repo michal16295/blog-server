@@ -1,5 +1,6 @@
 const socketServices = require("../services/socket");
 const CONSTANTS = require("../common/constants");
+const client = require("./socketClient").send;
 
 module.exports = function (io) {
   io.use(async (socket, next) => {
@@ -11,7 +12,6 @@ module.exports = function (io) {
       next();
     }
   });
-
   socketEvents(io);
 };
 
@@ -46,7 +46,9 @@ function socketEvents(io) {
           });
           return;
         }
+
         io.to(socket.id).emit(`add-message-response`, messageResult);
+        messageResult.to = data.reciever;
         io.to(toSocketId).emit(`add-message-response`, messageResult);
       }
     });
@@ -98,6 +100,9 @@ function socketEvents(io) {
         blocker: data.blocker,
         isBlocked: data.isBlocked,
       });
+      if (!data.isBlocked) {
+        io.to(socket.id).emit(`user-block-response`, block);
+      }
     });
   });
 }

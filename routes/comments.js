@@ -5,7 +5,7 @@ const { Comment } = require("../models/comments");
 const auth = require("../middlewares/auth");
 const mongoose = require("mongoose");
 const { Blog } = require("../models/blogs");
-const { Notification } = require("../models/notification");
+const { createNotification } = require("../services/notifications");
 const { Settings } = require("../models/settings");
 const ITEMS_PER_PAGE = 10;
 
@@ -24,15 +24,15 @@ router.post("/create", [auth], async (req, res) => {
     const settings = await Settings.findOne({ user: blog.owner });
     if (settings.web.includes("comments")) {
       if (userName !== blog.owner) {
-        const notify = new Notification({
-          from: userName,
-          to: blog.owner,
+        const data = {
+          userName,
+          owner: blog.owner,
           title: blog.title,
-          link: blogId,
+          blogId,
           type: "blog",
           content: " left a comment on your post",
-        });
-        await notify.save();
+        };
+        await createNotification(data);
       }
     }
     const count = await Comment.find({ blogId }).countDocuments();
@@ -42,6 +42,7 @@ router.post("/create", [auth], async (req, res) => {
     };
     return res.status(c.SERVER_OK_HTTP_CODE).send(data);
   } catch (err) {
+    console.log(err);
     return res.status(c.SERVER_ERROR_HTTP_CODE).json(err.message);
   }
 });

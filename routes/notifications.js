@@ -56,6 +56,19 @@ router.put("/viewed/:id", [auth], async (req, res) => {
     return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
   }
 });
+//SET VIEWED ALL
+router.put("/checkAll", [auth], async (req, res) => {
+  const { userName } = req.user;
+  try {
+    await Notification.updateMany(
+      { to: userName },
+      { $set: { isViewed: true } }
+    );
+    return res.status(c.SERVER_OK_HTTP_CODE).send("Viewd All Success");
+  } catch (err) {
+    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
+  }
+});
 //SETTINGS
 router.post("/settings", [auth], async (req, res) => {
   let data = req.body;
@@ -71,8 +84,9 @@ router.post("/settings", [auth], async (req, res) => {
     let settings = await Settings.findOne({ user });
     if (!settings) {
       settings = new Settings({
-        web: webOptions,
-        email: emailOptions,
+        user,
+        web: arr,
+        email: arr,
       });
       await settings.save();
     } else {

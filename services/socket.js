@@ -91,8 +91,9 @@ module.exports.toggleBlockUser = async (data) => {
   };
   try {
     await Chat.updateOne(cond, { $set: { isBlocked, blocker } });
-    if (isBlocked) return (res.success = "User Is Blocked");
-    if (!isBlocked) return (res.success = "User Is Unblocked");
+    const user = await User.findOne({ userName: blocked }).select("userName");
+    if (user) return user;
+    return (res.error = "Error Accured");
   } catch (err) {
     return (res.error = err.message);
   }

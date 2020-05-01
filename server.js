@@ -10,15 +10,15 @@ var corOp = {
 };
 app.use(cors(corOp));
 const connectDB = require("./config/db");
+const httpServer = http.Server(app);
+const socket = socketio(httpServer);
+require("./socket/socket")(socket);
+require("./socket/socketClient").setIo(socket);
 require("./models/user");
 require("./services/passport");
 connectDB();
 require("./middlewares/cookieSession")(app);
 require("./startup/routes")(app);
-
-const httpServer = http.Server(app);
-const socket = socketio(httpServer);
-require("./socket/socket")(socket);
 
 const PORT = process.env.PORT || 5000;
 

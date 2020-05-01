@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const c = require("../common/constants");
 const { Reaction } = require("../models/reaction");
-const { Notification } = require("../models/notification");
+const { createNotification } = require("../services/notifications");
 const { Blog } = require("../models/blogs");
 const auth = require("../middlewares/auth");
 const mongoose = require("mongoose");
@@ -30,15 +30,15 @@ router.post("/setReaction", [auth], async (req, res) => {
     const settings = await Settings.findOne({ user: blog.owner });
     if (settings.web.includes("reactions")) {
       if (userName !== blog.owner) {
-        const notify = new Notification({
-          from: userName,
-          to: blog.owner,
+        const data = {
+          userName,
+          owner: blog.owner,
           title: blog.title,
-          link: blogId,
+          blogId,
           type: "blog",
           content: ` reacted to your post with ${name}`,
-        });
-        await notify.save();
+        };
+        await createNotification(data);
       }
     }
   }
@@ -49,13 +49,17 @@ router.post("/setReaction", [auth], async (req, res) => {
 //GET CURRENT USER REACTION
 router.get("/currentUserReaction/:blogId", [auth], async (req, res) => {
   const { blogId } = req.params;
-  const reaction = await Reaction.findOne({
-    blogId,
-    userName: req.user.userName,
-  });
-  if (!reaction)
-    return res.status(c.SERVER_NOT_FOUND_HTTP_CODE).json("No Reaction");
-  return res.status(c.SERVER_OK_HTTP_CODE).send(reaction.type);
+  try {
+    const reaction = await Reaction.findOne({
+      blogId,
+      userName: req.user.userName,
+    });
+    if (!reaction)
+      return res.status(c.SERVER_NOT_FOUND_HTTP_CODE).json("No Reaction");
+    return res.status(c.SERVER_OK_HTTP_CODE).send(reaction.type);
+  } catch (err) {
+    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
+  }
 });
 //DELETE REACTION
 router.delete("/remove/:blogId/:userName", [auth], async (req, res) => {
