@@ -6,7 +6,7 @@ const { Blog } = require("../models/blogs");
 const { Notification } = require("../models/notification");
 const { createNotifications } = require("../services/notifications");
 const { Settings } = require("../models/settings");
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 4;
 
 module.exports.blogGroupRel = async (groups, id) => {
   let ub = [];

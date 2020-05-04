@@ -11,7 +11,7 @@ const mongoose = require("mongoose");
 const { searchQuery, getAll, isValid } = require("../services/aggregate");
 const { UserGroupCreate } = require("../services/groups");
 const { Settings } = require("../models/settings");
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 5;
 
 //CREATE A GROUP
 router.post("/create", [auth], async (req, res) => {

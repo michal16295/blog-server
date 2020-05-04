@@ -1,5 +1,6 @@
 const socketServices = require("../services/socket");
 const CONSTANTS = require("../common/constants");
+const { User } = require("../models/user");
 const client = require("./socketClient").send;
 
 module.exports = function (io) {
@@ -103,6 +104,19 @@ function socketEvents(io) {
       if (!data.isBlocked) {
         io.to(socket.id).emit(`user-block-response`, block);
       }
+    });
+
+    /**
+     * sending the disconnected user to all socket users.
+     */
+    socket.on("disconnect", async () => {
+      let userId = socket.request._query["userId"];
+      const user = await User.findById(userId);
+      await socketServices.logout(user.userName);
+      socket.broadcast.emit(`chat-list-user-logout`, {
+        error: false,
+        userName: user.userName,
+      });
     });
   });
 }

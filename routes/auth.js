@@ -169,14 +169,18 @@ router.get("/:userName", async (req, res) => {
 });
 
 //Get All Users
-router.get("/all/:page", async (req, res) => {
+router.get("/all/:page", [auth], async (req, res) => {
   let search = req.query.search;
   if (search === "undefined") {
     search = "";
   }
   const cusrrentPage = parseInt(req.params.page) || 1;
   const offset = ITEMS_PER_PAGE * (cusrrentPage - 1);
-  const users = await getAll(User, search, offset, ITEMS_PER_PAGE, "userName");
+  let users = await getAll(User, search, offset, ITEMS_PER_PAGE, "userName");
+  const index = users[0].data.findIndex(
+    (obj) => obj.userName === req.user.userName
+  );
+  users[0].data.splice(index, 1);
   if (isValid(users))
     return res.status(c.SERVER_NOT_FOUND_HTTP_CODE).json(c.USER_NOT_FOUND);
   return res.status(c.SERVER_OK_HTTP_CODE).send(users);
