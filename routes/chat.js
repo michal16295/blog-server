@@ -134,24 +134,6 @@ router.get("/unreadMsgs/:reciever", [auth], async (req, res) => {
   }
 });
 
-//UBBLOCK USER
-router.put("/unblock/:userName", [auth], async (req, res) => {
-  const blocker = req.user.userName;
-  const blocked = req.params.userName;
-  const cond = {
-    $or: [
-      { user1: blocker, user2: blocked },
-      { user1: blocked, user2: blocker },
-    ],
-  };
-  try {
-    await Chat.updateOne(cond, { $set: { isBlocked: false } });
-    return res.status(c.SERVER_OK_HTTP_CODE).send({ user: blocked });
-  } catch (err) {
-    console.log(err);
-    return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
-  }
-});
 //LIST OF BLOCKED USERS
 router.get("/blockedList", [auth], async (req, res) => {
   const { userName } = req.user;

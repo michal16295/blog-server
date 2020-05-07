@@ -16,9 +16,6 @@ const bcrypt = require("bcrypt");
 const jwtDecode = require("jwt-decode");
 const auth = require("../middlewares/auth");
 const { getAll, isValid } = require("../services/aggregate");
-const { generateRandomAvatar } = require("../avatar/generateAvatar");
-const { updateAvatar } = require("../services/common");
-
 const ITEMS_PER_PAGE = 4;
 
 router.get(
@@ -59,15 +56,16 @@ router.post("/register", async (req, res) => {
   }
   const salt = await bcrypt.genSalt(10);
   const newPassword = await bcrypt.hash(req.body.password, salt);
-  const avatar = generateRandomAvatar("Circle");
+  const avatar =
+    "https://res.cloudinary.com/photocloudmichal/image/upload/v1588857293/avatar_z3igza.png";
   user = new User({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     email: req.body.email,
     password: newPassword,
     userName: req.body.userName,
-    avatar,
     online: "Y",
+    avatar,
   });
   await user.save();
   let arr = ["groups", "blogs", "comments", "reactions"];
@@ -112,7 +110,9 @@ router.post("/deleteAccount", [auth], async (req, res) => {
     groups2 = groups2.map((i) => i._id);
     await UserGroup.deleteMany({ groupId: { $in: groups2 } });
     await Group.deleteMany({ owner: userName });
+    await Settings.deleteOne({ user: userName });
     await User.deleteOne({ _id });
+
     return res.status(c.SERVER_OK_HTTP_CODE).send("User deleted");
   } catch (err) {
     return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
@@ -136,7 +136,6 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.log(err);
   }
-
   const token = user.generateAuthToken();
   res
     .header("x-auth-token", token)
@@ -188,7 +187,7 @@ router.get("/all/:page", [auth], async (req, res) => {
 
 //EDIT PROFILE
 router.put("/edit/:id", async (req, res) => {
-  const { firstName, lastName, email, avatar } = req.body;
+  const { firstName, lastName, email } = req.body;
   const user = await User.findById(req.params.id);
   if (!user)
     return res.status(c.SERVER_NOT_FOUND_HTTP_CODE).json(c.USER_NOT_FOUND);
@@ -197,15 +196,10 @@ router.put("/edit/:id", async (req, res) => {
   if (emailTaken._id.toString() !== req.params.id.toString()) {
     return res.status(c.SERVER_NOT_ALLOWED_HTTP_CODE).json(c.EMAIL_IS_TAKEN);
   }
-  if (user.avatar !== avatar) {
-    updateAvatar(Group, user.userName, avatar);
-    updateAvatar(Blog, user.userName, avatar);
-  }
   let updatedUser = {
     firstName,
     lastName,
     email,
-    avatar,
   };
   await User.updateOne({ _id: req.params.id }, { $set: updatedUser });
   return res.status(c.SERVER_OK_HTTP_CODE).send(user);
@@ -258,4 +252,5 @@ router.put("/logout/:userName", async (req, res) => {
     return res.status(c.SERVER_ERROR_HTTP_CODE).send(err.message);
   }
 });
+
 module.exports = router;

@@ -3,12 +3,15 @@ const cors = require("cors");
 const app = express();
 const http = require("http");
 const socketio = require("socket.io");
+var cloudinary = require("cloudinary").v2;
+
 var corOp = {
   credentials: true,
   origin: "http://localhost:3000",
   optionsSuccessStatus: 200,
 };
 app.use(cors(corOp));
+
 const connectDB = require("./config/db");
 const httpServer = http.Server(app);
 const socket = socketio(httpServer);
@@ -20,7 +23,7 @@ connectDB();
 require("./middlewares/cookieSession")(app);
 require("./startup/routes")(app);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5100;
 
 httpServer.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 

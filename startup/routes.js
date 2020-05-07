@@ -5,10 +5,11 @@ const reactions = require("../routes/reactions");
 const comments = require("../routes/comments");
 const notifications = require("../routes/notifications");
 const chat = require("../routes/chat");
-const express = require("express");
+const file = require("../routes/file");
+const fileUpload = require("express-fileupload");
 
 module.exports = (app) => {
-  app.use(express.json());
+  app.use(fileUpload());
   app.use("/users", users);
   app.use("/groups", groups);
   app.use("/blogs", blogs);
@@ -16,4 +17,5 @@ module.exports = (app) => {
   app.use("/comments", comments);
   app.use("/notifications", notifications);
   app.use("/chat", chat);
+  app.use("/files", file);
 };
